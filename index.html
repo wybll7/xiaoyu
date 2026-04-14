@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小钰猫咪互动</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF85A2',
+                        secondary: '#B5EAD7',
+                        accent: '#FFDAC1',
+                        background: '#FFF9F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'wiggle': 'wiggle 1s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'heart-beat': 'heartBeat 1.5s ease-in-out',
+                    },
+                    keyframes: {
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-3deg)' },
+                            '50%': { transform: 'rotate(3deg)' },
+                        },
+                        heartBeat: {
+                            '0%': { transform: 'scale(1)' },
+                            '14%': { transform: 'scale(1.3)' },
+                            '28%': { transform: 'scale(1)' },
+                            '42%': { transform: 'scale(1.3)' },
+                            '70%': { transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .text-shadow-lg {
+                text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.12);
+            }
+            .cat-shadow {
+                filter: drop-shadow(0px 8px 16px rgba(255, 133, 162, 0.25));
+            }
+            .btn-shadow {
+                filter: drop-shadow(0px 4px 8px rgba(255, 133, 162, 0.3));
+            }
+            .btn-hover:active {
+                transform: translateY(2px);
+                filter: drop-shadow(0px 2px 4px rgba(255, 133, 162, 0.3));
+            }
+            .cheek-pinch {
+                transition: transform 0.1s ease;
+            }
+            .floating {
+                animation: floating 3s ease-in-out infinite;
+            }
+            @keyframes floating {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+                100% { transform: translateY(0px); }
+            }
+            .heart {
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background-color: #FF85A2;
+                transform: rotate(45deg);
+                animation: heartFloat 1s ease-out forwards;
+                opacity: 0;
+            }
+            .heart:before, .heart:after {
+                content: '';
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background-color: #FF85A2;
+                border-radius: 50%;
+            }
+            .heart:before {
+                top: -10px;
+                left: 0;
+            }
+            .heart:after {
+                top: 0;
+                left: -10px;
+            }
+            @keyframes heartFloat {
+                0% {
+                    transform: rotate(45deg) scale(0);
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: rotate(45deg) scale(1.5) translateY(-50px);
+                    opacity: 0;
+                }
+            }
+            .kiss-mark {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                background-image: url('https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/2dc56604d4114861a126235775eb0153~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775677&x-signature=26bGG7jxLQa8iCfQ3u%2Fl2x%2FiuvU%3D');
+                background-size: contain;
+                background-repeat: no-repeat;
+                animation: kissMark 1.5s ease-out forwards;
+                opacity: 0;
+            }
+            @keyframes kissMark {
+                0% {
+                    transform: scale(0);
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(1.2) translateY(-30px);
+                    opacity: 0;
+                }
+            }
+            .paw-print {
+                position: absolute;
+                width: 25px;
+                height: 25px;
+                background-color: rgba(255, 133, 162, 0.7);
+                border-radius: 50% 50% 0 50%;
+                transform: rotate(45deg);
+                animation: pawPrint 1s ease-out forwards;
+                opacity: 0;
+            }
+            @keyframes pawPrint {
+                0% {
+                    transform: rotate(45deg) scale(0);
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: rotate(45deg) scale(1) translateY(20px);
+                    opacity: 0;
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex flex-col items-center justify-between py-8 px-4">
+    <!-- 顶部标题 -->
+    <div class="w-full text-center mb-4">
+        <h1 class="text-[clamp(1.8rem,5vw,2.5rem)] font-bold text-primary text-shadow-lg">小钰猫咪</h1>
+        <p class="text-gray-600 mt-2">点击猫咪互动吧～</p>
+    </div>
+    
+    <!-- 猫咪主区域 -->
+    <div class="relative w-full max-w-md aspect-square flex items-center justify-center my-4">
+        <!-- 猫咪容器 -->
+        <div id="cat-container" class="relative w-3/4 aspect-square">
+            <!-- 默认猫咪表情 -->
+            <img id="cat-neutral" src="https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/8e4ae3c9ae884dbbad86e14957214a23~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775661&x-signature=751WMIJiyyDRUkltTU%2BQF5%2BJJEc%3D" 
+                 class="absolute inset-0 w-full h-full object-contain cat-shadow floating" alt="小钰猫咪">
+            
+            <!-- 开心表情 (初始隐藏) -->
+            <img id="cat-happy" src="https://p6-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/b96d7db1201d41178f120aa0131066fb~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775661&x-signature=Q6PoLxk97EYbNmgrJqlXqG47ewg%3D" 
+                 class="absolute inset-0 w-full h-full object-contain cat-shadow hidden" alt="开心的小钰猫咪">
+            
+            <!-- 捏脸表情 (初始隐藏) -->
+            <img id="cat-pinch" src="https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/8dbc4738957a40e18eca7d3728b0a312~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775661&x-signature=N%2BnJT4yxvAMLNIPo9KBCjv6wf5o%3D" 
+                 class="absolute inset-0 w-full h-full object-contain cat-shadow hidden" alt="被捏脸的小钰猫咪">
+            
+            <!-- 害羞表情 (初始隐藏) -->
+            <img id="cat-kissed" src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/36459ebce19047e887e4986cd234c70a~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775662&x-signature=XHxesisQNxPLf1UTtt21ddKVLwA%3D" 
+                 class="absolute inset-0 w-full h-full object-contain cat-shadow hidden" alt="害羞的小钰猫咪">
+            
+            <!-- 互动效果容器 -->
+            <div id="interaction-effects" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+    </div>
+    
+    <!-- 互动按钮区域 -->
+    <div class="w-full max-w-md grid grid-cols-2 gap-4 mb-8">
+        <button id="pinch-btn" class="flex flex-col items-center justify-center bg-white rounded-2xl p-4 btn-shadow btn-hover transition-all duration-200 hover:bg-accent/30">
+            <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/f5b78bff4c8d495ab50b472c6e515dca~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775677&x-signature=aKA3UJirFTuMLkp27DSDj7RTVSA%3D" 
+                 class="w-12 h-12 object-contain mb-2" alt="捏脸">
+            <span class="text-primary font-medium">捏脸</span>
+        </button>
+        
+        <button id="kiss-btn" class="flex flex-col items-center justify-center bg-white rounded-2xl p-4 btn-shadow btn-hover transition-all duration-200 hover:bg-accent/30">
+            <img src="https://p11-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/2dc56604d4114861a126235775eb0153~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775677&x-signature=26bGG7jxLQa8iCfQ3u%2Fl2x%2FiuvU%3D" 
+                 class="w-12 h-12 object-contain mb-2" alt="亲脸颊">
+            <span class="text-primary font-medium">亲脸颊</span>
+        </button>
+        
+        <button id="pet-btn" class="flex flex-col items-center justify-center bg-white rounded-2xl p-4 btn-shadow btn-hover transition-all duration-200 hover:bg-accent/30">
+            <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/38df5e1217ab4c1e85cb5516687f5775~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775677&x-signature=AavegPFF%2BfTZEX4phLkEDAH6TGQ%3D" 
+                 class="w-12 h-12 object-contain mb-2" alt="抚摸">
+            <span class="text-primary font-medium">抚摸</span>
+        </button>
+        
+        <button id="gift-btn" class="flex flex-col items-center justify-center bg-white rounded-2xl p-4 btn-shadow btn-hover transition-all duration-200 hover:bg-accent/30">
+            <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/335b25324e2149fb87fc5bcf7d370718~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=20260415002046146A19BFB124CBF1309D&rrcfp=f06b921b&x-expires=1778775677&x-signature=KUP06VjufXTSJ28RnfZCWhkrsjo%3D" 
+                 class="w-12 h-12 object-contain mb-2" alt="礼物">
+            <span class="text-primary font-medium">礼物</span>
+        </button>
+    </div>
+    
+    <!-- 底部消息区域 -->
+    <div id="message-container" class="w-full max-w-md bg-white rounded-2xl p-4 mb-4 text-center hidden">
+        <p id="message-text" class="text-gray-700 font-medium"></p>
+    </div>
+    
+    <script>
+        // DOM元素
+        const catContainer = document.getElementById('cat-container');
+        const catNeutral = document.getElementById('cat-neutral');
+        const catHappy = document.getElementById('cat-happy');
+        const catPinch = document.getElementById('cat-pinch');
+        const catKissed = document.getElementById('cat-kissed');
+        const interactionEffects = document.getElementById('interaction-effects');
+        const messageContainer = document.getElementById('message-container');
+        const messageText = document.getElementById('message-text');
+        
+        // 按钮
+        const pinchBtn = document.getElementById('pinch-btn');
+        const kissBtn = document.getElementById('kiss-btn');
+        const petBtn = document.getElementById('pet-btn');
+        const giftBtn = document.getElementById('gift-btn');
+        
+        // 猫咪状态
+        let catState = {
+            mood: 'neutral', // neutral, happy, loved, excited
+            interactionCount: 0,
+            lastInteraction: null
+        };
+        
+        // 音效（使用Web Audio API模拟）
+        function playSound(frequency, duration, type = 'sine') {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+        
+        // 显示消息
+        function showMessage(text, duration = 2000) {
+            messageText.textContent = text;
+            messageContainer.classList.remove('hidden');
+            
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, duration);
+        }
+        
+        // 显示猫咪表情
+        function showCatExpression(expression) {
+            // 隐藏所有表情
+            catNeutral.classList.add('hidden');
+            catHappy.classList.add('hidden');
+            catPinch.classList.add('hidden');
+            catKissed.classList.add('hidden');
+            
+            // 显示指定表情
+            switch(expression) {
+                case 'neutral':
+                    catNeutral.classList.remove('hidden');
+                    break;
+                case 'happy':
+                    catHappy.classList.remove('hidden');
+                    break;
+                case 'pinch':
+                    catPinch.classList.remove('hidden');
+                    break;
+                case 'kissed':
+                    catKissed.classList.remove('hidden');
+                    break;
+            }
+        }
+        
+        // 创建心形特效
+        function createHeartEffect(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.style.left = `${x}px`;
+            heart.style.top = `${y}px`;
+            interactionEffects.appendChild(heart);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                heart.remove();
+            }, 1000);
+        }
+        
+        // 创建吻痕特效
+        function createKissEffect(x, y) {
+            const kiss = document.createElement('div');
+            kiss.className = 'kiss-mark';
+            kiss.style.left = `${x}px`;
+            kiss.style.top = `${y}px`;
+            interactionEffects.appendChild(kiss);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                kiss.remove();
+            }, 1500);
+        }
+        
+        // 创建爪印特效
+        function createPawPrintEffect(x, y) {
+            const pawPrint = document.createElement('div');
+            pawPrint.className = 'paw-print';
+            pawPrint.style.left = `${x}px`;
+            pawPrint.style.top = `${y}px`;
+            interactionEffects.appendChild(pawPrint);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                pawPrint.remove();
+            }, 1000);
+        }
+        
+        // 随机生成特效
+        function createRandomEffects(count, effectType) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const x = Math.random() * catContainer.offsetWidth;
+                    const y = Math.random() * catContainer.offsetHeight;
+                    
+                    if (effectType === 'heart') {
+                        createHeartEffect(x, y);
+                    } else if (effectType === 'kiss') {
+                        createKissEffect(x, y);
+                    } else if (effectType === 'paw') {
+                        createPawPrintEffect(x, y);
+                    }
+                }, i * 200);
+            }
+        }
+        
+        // 捏脸互动
+        function handlePinch() {
+            showCatExpression('pinch');
+            playSound(440, 0.2);
+            showMessage('喵～你捏疼我啦！');
+            
+            // 2秒后恢复默认表情
+            setTimeout(() => {
+                showCatExpression('neutral');
+            }, 2000);
+            
+            catState.interactionCount++;
+            catState.lastInteraction = 'pinch';
+        }
+        
+        // 亲脸颊互动
+        function handleKiss() {
+            showCatExpression('kissed');
+            playSound(660, 0.3, 'triangle');
+            showMessage('小钰害羞了～');
+            
+            // 创建吻痕特效
+            createKissEffect(catContainer.offsetWidth * 0.7, catContainer.offsetHeight * 0.4);
+            
+            // 3秒后恢复默认表情
+            setTimeout(() => {
+                showCatExpression('neutral');
+            }, 3000);
+            
+            catState.interactionCount++;
+            catState.lastInteraction = 'kiss';
+            
+            // 增加好感度
+            if (catState.mood !== 'loved') {
+                catState.mood = 'loved';
+            }
+        }
+        
+        // 抚摸互动
+        function handlePet() {
+            showCatExpression('happy');
+            playSound(550, 0.4, 'sine');
+            showMessage('呼噜呼噜～小钰很舒服～');
+            
+            // 创建心形特效
+            createHeartEffect(catContainer.offsetWidth * 0.3, catContainer.offsetHeight * 0.4);
+            
+            // 3秒后恢复默认表情
+            setTimeout(() => {
+                showCatExpression('neutral');
+            }, 3000);
+            
+            catState.interactionCount++;
+            catState.lastInteraction = 'pet';
+            
+            // 增加好感度
+            if (catState.mood === 'neutral') {
+                catState.mood = 'happy';
+            }
+        }
+        
+        // 礼物互动
+        function handleGift() {
+            showCatExpression('happy');
+            playSound(880, 0.2, 'triangle');
+            showMessage('小钰喜欢你的礼物！');
+            
+            // 创建多个心形特效
+            createRandomEffects(5, 'heart');
+            
+            // 4秒后恢复默认表情
+            setTimeout(() => {
+                showCatExpression('neutral');
+            }, 4000);
+            
+            catState.interactionCount++;
+            catState.lastInteraction = 'gift';
+            
+            // 大幅增加好感度
+            catState.mood = 'excited';
+        }
+        
+        // 猫咪随机互动
+        function randomCatInteraction() {
+            // 根据当前心情和互动次数决定随机互动的概率
+            const probability = catState.interactionCount > 5 ? 0.3 : 0.1;
+            
+            if (Math.random() < probability) {
+                // 创建随机爪印特效
+                createRandomEffects(1, 'paw');
+                
+                // 根据心情显示不同消息
+                let message;
+                switch(catState.mood) {
+                    case 'happy':
+                        message = '小钰想和你玩～';
+                        break;
+                    case 'loved':
+                        message = '小钰喜欢你～';
+                        break;
+                    case 'excited':
+                        message = '小钰超开心！';
+                        break;
+                    default:
+                        message = '喵～';
+                }
+                
+                showMessage(message, 3000);
+            }
+        }
+        
+        // 按钮点击事件
+        pinchBtn.addEventListener('click', handlePinch);
+        kissBtn.addEventListener('click', handleKiss);
+        petBtn.addEventListener('click', handlePet);
+        giftBtn.addEventListener('click', handleGift);
+        
+        // 猫咪区域点击事件（根据点击位置触发不同互动）
+        catContainer.addEventListener('click', (e) => {
+            const rect = catContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // 计算点击位置相对于猫咪的比例
+            const xRatio = x / rect.width;
+            const yRatio = y / rect.height;
+            
+            // 根据点击位置触发不同互动
+            if (yRatio < 0.4) {
+                // 上部分（头部）
+                if (xRatio < 0.4) {
+                    // 左耳朵
+                    playSound(440, 0.1);
+                    showMessage('耳朵痒痒的～');
+                } else if (xRatio > 0.6) {
+                    // 右耳朵
+                    playSound(440, 0.1);
+                    showMessage('耳朵痒痒的～');
+                } else {
+                    // 头顶
+                    handlePet();
+                }
+            } else if (yRatio < 0.7) {
+                // 中部分（脸部）
+                if (xRatio < 0.4) {
+                    // 左脸颊
+                    handleKiss();
+                } else if (xRatio > 0.6) {
+                    // 右脸颊
+                    handleKiss();
+                } else {
+                    // 鼻子/嘴巴
+                    playSound(550, 0.2);
+                    showMessage('小钰有点痒～');
+                }
+            } else {
+                // 下部分（身体）
+                handlePet();
+            }
+        });
+        
+        // 触摸事件（移动设备）
+        let touchStartX, touchStartY;
+        let isPinching = false;
+        
+        catContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+        
+        catContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // 防止页面滚动
+            
+            if (e.touches.length === 2) {
+                // 双指触摸（捏脸）
+                isPinching = true;
+                handlePinch();
+            }
+        });
+        
+        catContainer.addEventListener('touchend', (e) => {
+            if (!isPinching) {
+                // 单指触摸，触发点击事件
+                const rect = catContainer.getBoundingClientRect();
+                const x = touchStartX - rect.left;
+                const y = touchStartY - rect.top;
+                
+                // 计算点击位置相对于猫咪的比例
+                const xRatio = x / rect.width;
+                const yRatio = y / rect.height;
+                
+                // 根据点击位置触发不同互动
+                if (yRatio < 0.4) {
+                    // 上部分（头部）
+                    if (xRatio < 0.4 || xRatio > 0.6) {
+                        // 耳朵
+                        playSound(440, 0.1);
+                        showMessage('耳朵痒痒的～');
+                    } else {
+                        // 头顶
+                        handlePet();
+                    }
+                } else if (yRatio < 0.7) {
+                    // 中部分（脸部）
+                    if (xRatio < 0.4 || xRatio > 0.6) {
+                        // 脸颊
+                        handleKiss();
+                    } else {
+                        // 鼻子/嘴巴
+                        playSound(550, 0.2);
+                        showMessage('小钰有点痒～');
+                    }
+                } else {
+                    // 下部分（身体）
+                    handlePet();
+                }
+            }
+            
+            isPinching = false;
+        });
+        
+        // 定期触发随机互动
+        setInterval(randomCatInteraction, 10000);
+        
+        // 初始化
+        showMessage('小钰等你来互动～', 3000);
+    </script>
+</body>
+</html>
